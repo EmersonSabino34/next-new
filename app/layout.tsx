@@ -1,34 +1,56 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+"use client";
+import { useState } from "react";
+export default function AppointmentForm({ onNewAppointment }: { onNewAppointment: () => void }) {
+  const [form, setForm] = useState({ name: "", service: "", date: "" });
+  const [loading, setLoading] = useState(false);
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+    await fetch("/api/appointments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
 
-export const metadata: Metadata = {
-  title: "Emerson Dev",
-  description: "Programando um App FullStack",
-};
+    setForm({ name: "", service: "", date: "" });
+    onNewAppointment();
+    setLoading(false);
+  };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    <form onSubmit={handleSubmit} className="p-4 border rounded-md bg-white shadow-sm space-y-3">
+      <input
+        type="text"
+        placeholder="Seu nome"
+        value={form.name}
+        onChange={(e) => setForm({ ...form, name: e.target.value })}
+        className="border p-2 w-full rounded"
+        required
+      />
+      <input
+        type="text"
+        placeholder="Serviço (ex: Corte de cabelo)"
+        value={form.service}
+        onChange={(e) => setForm({ ...form, service: e.target.value })}
+        className="border p-2 w-full rounded"
+        required
+      />
+      <input
+        type="datetime-local"
+        value={form.date}
+        onChange={(e) => setForm({ ...form, date: e.target.value })}
+        className="border p-2 w-full rounded"
+        required
+      />
+      <button
+        type="submit"
+        disabled={loading}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
       >
-        {children}
-      </body>
-    </html>
+        {loading ? "Salvando..." : "Agendar"}
+      </button>
+    </form>
   );
 }
