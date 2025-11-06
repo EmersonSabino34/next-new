@@ -5,3 +5,6 @@ export default function home(){
         </div>
     )
 }
+<head>
+    <title>home</title>
+</head>
